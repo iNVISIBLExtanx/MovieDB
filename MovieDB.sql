@@ -13,21 +13,15 @@ CREATE PROCEDURE dbo.spInsertActorDetails
     @actorNationality NVARCHAR(20)
 AS
 
-    -- Insert rows into table 'Actors'
     INSERT INTO Actors
-    ( -- columns to insert data into
-     [ActorID], [FirstName], [LastName],[Nationality]
-    )
+    ( [ActorID], [FirstName], [LastName],[Nationality])
     VALUES
-    ( -- first row: values for the columns in the list above
-     @actorID, @actorFname, @actorLname, @actorNationality
-    )
+    ( @actorID, @actorFname, @actorLname, @actorNationality)
     GO
 
 GO
 
--- Create a new stored procedure called 'spRetreveTYD' in schema 'dbo'
--- Drop the stored procedure if it already exists
+
 IF EXISTS (
 SELECT *
     FROM INFORMATION_SCHEMA.ROUTINES
@@ -48,3 +42,41 @@ AS
     GO
 GO
 
+IF EXISTS (
+SELECT *
+    FROM INFORMATION_SCHEMA.ROUTINES
+WHERE SPECIFIC_SCHEMA = N'dbo'
+    AND SPECIFIC_NAME = N'spUpdateRating'
+)
+DROP PROCEDURE dbo.spUpdateRating
+GO
+CREATE PROCEDURE dbo.spUpdateRating
+    @movieid NVARCHAR = NULL,
+    @moviesRating NVARCHAR = NULL 
+AS
+    UPDATE Movies
+    SET
+        [Rating] = @moviesRating
+    WHERE 	
+        movieID = Movies.MovieID
+    GO
+GO
+
+IF EXISTS (
+SELECT *
+    FROM INFORMATION_SCHEMA.ROUTINES
+WHERE SPECIFIC_SCHEMA = N'dbo'
+    AND SPECIFIC_NAME = N'spNameOfActorsByDirector'
+)
+DROP PROCEDURE dbo.spNameOfActorsByDirector
+GO
+CREATE PROCEDURE dbo.spNameOfActorsByDirector
+    @directorid int = 0,
+    @firstname NVARCHAR(20) = NULL OUTPUT,
+    @lastname NVARCHAR(20) = NULL OUTPUT
+AS
+    SELECT firstname = Actors.FirstName , lastname = Actors.LastName
+    FROM dbo.Actors, dbo.MovieActor, dbo.Movies, dbo.Directors
+    WHERE  dbo.Actors.ActorID = dbo.MovieActor.ActorID AND dbo.MovieActor.MovieID = dbo.Movies.MovieID AND dbo.Movies.DirectorID = dbo.Directors.DirectorID
+    GO
+GO
